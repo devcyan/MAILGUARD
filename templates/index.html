@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MailGuard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>MailGuard</h1>
+
+        <p class="subtitle">
+            AI-Based Spam & Email Analyzer
+        </p>
+
+        <form method="POST">
+
+            <textarea
+                name="email"
+                placeholder="Paste email content here..."
+                required
+            >{{ email_text }}</textarea>
+
+            <button type="submit">
+                Analyze Email
+            </button>
+
+        </form>
+
+        {% if result %}
+
+        <div class="result">
+
+            <h2>{{ result }}</h2>
+
+            <p>
+                Confidence:
+                <strong>{{ "%.2f"|format(confidence * 100) }}%</strong>
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>
