@@ -2,23 +2,105 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>MailGuard</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>
+        MailGuard | Email Security Analyzer
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
 </head>
 
 <body>
 
-    <div class="container">
+<div class="app">
 
-        <h1>MailGuard</h1>
+    <header class="header">
 
-        <p class="subtitle">
-            AI-Based Spam & Email Analyzer
+        <div class="brand">
+
+            <div class="logo">
+                M
+            </div>
+
+            <div>
+
+                <h1>
+                    MailGuard
+                </h1>
+
+                <p>
+                    AI-Powered Email Security Analyzer
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="status">
+
+            <span class="status-dot"></span>
+
+            SYSTEM ONLINE
+
+        </div>
+
+    </header>
+
+
+    <section class="hero">
+
+        <div class="badge">
+            EMAIL SECURITY
+        </div>
+
+        <h2>
+            Analyze suspicious emails.
+        </h2>
+
+        <p>
+            Analyze email content using machine learning,
+            URL inspection, phishing indicators and
+            email header analysis.
         </p>
+
+    </section>
+
+
+    <!-- EMAIL INPUT -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <span class="section-label">
+                    EMAIL ANALYSIS
+                </span>
+
+                <h3>
+                    Submit Email Content
+                </h3>
+
+            </div>
+
+            <div class="model-tag">
+                NLP + ML
+            </div>
+
+        </div>
+
 
         <form method="POST">
 
@@ -28,28 +110,624 @@
                 required
             >{{ email_text }}</textarea>
 
+
+            <!-- HEADER INPUT -->
+
+            <div class="header-input">
+
+                <div class="header-input-title">
+
+                    <div>
+
+                        <span class="section-label">
+                            OPTIONAL
+                        </span>
+
+                        <h3>
+                            Email Headers
+                        </h3>
+
+                    </div>
+
+                    <div class="header-tag">
+                        HEADER ANALYSIS
+                    </div>
+
+                </div>
+
+
+                <p class="header-help">
+
+                    Paste raw email headers here to analyze
+                    From, Reply-To, Return-Path, SPF, DKIM,
+                    DMARC and Received headers.
+
+                </p>
+
+
+                <textarea
+                    name="headers"
+                    class="headers-textarea"
+                    placeholder="From: sender@example.com&#10;Reply-To: reply@example.com&#10;Return-Path: bounce@example.com&#10;Authentication-Results: example.com; spf=pass; dkim=pass; dmarc=pass"
+                >{{ header_text }}</textarea>
+
+            </div>
+
+
             <button type="submit">
+
                 Analyze Email
+
+                <span>
+                    →
+                </span>
+
             </button>
 
         </form>
 
-        {% if result %}
+    </section>
 
-        <div class="result">
 
-            <h2>{{ result }}</h2>
+    {% if analysis %}
 
-            <p>
-                Confidence:
-                <strong>{{ "%.2f"|format(confidence * 100) }}%</strong>
-            </p>
+    <!-- SECURITY REPORT -->
+
+    <section class="report">
+
+        <div class="report-header">
+
+            <div>
+
+                <span class="section-label">
+                    SECURITY ASSESSMENT
+                </span>
+
+                <h3>
+                    Analysis Complete
+                </h3>
+
+            </div>
+
+            <div
+                class="risk-badge risk-{{ analysis.risk.level|lower }}"
+            >
+
+                {{ analysis.risk.level }}
+
+            </div>
 
         </div>
 
-        {% endif %}
 
-    </div>
+        <!-- RISK -->
+
+        <div class="risk-section">
+
+            <div class="risk-score">
+
+                <span>
+                    RISK SCORE
+                </span>
+
+                <strong>
+                    {{ analysis.risk.score }}
+                    <small>/100</small>
+                </strong>
+
+            </div>
+
+
+            <div class="risk-description">
+
+                {% if analysis.risk.level == "CRITICAL" %}
+
+                    Critical risk indicators detected.
+                    Do not interact with this email.
+
+                {% elif analysis.risk.level == "HIGH" %}
+
+                    Multiple suspicious indicators
+                    were detected.
+
+                {% elif analysis.risk.level == "MEDIUM" %}
+
+                    Some suspicious characteristics
+                    were detected.
+
+                {% else %}
+
+                    No major suspicious indicators
+                    were detected.
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- CLASSIFICATION -->
+
+        <div class="classification">
+
+            <div
+                class="classification-icon
+                {% if analysis.result == 'SPAM' %}
+                    danger
+                {% else %}
+                    safe
+                {% endif %}
+            ">
+
+                {% if analysis.result == "SPAM" %}
+
+                    !
+
+                {% else %}
+
+                    ✓
+
+                {% endif %}
+
+            </div>
+
+
+            <div>
+
+                <span class="section-label">
+                    ML CLASSIFICATION
+                </span>
+
+                <h2>
+                    {{ analysis.result }}
+                </h2>
+
+                <p>
+
+                    Model confidence:
+
+                    <strong>
+
+                        {{ "%.2f"|format(
+                            analysis.confidence * 100
+                        ) }}%
+
+                    </strong>
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- SECURITY FINDINGS -->
+
+        <div class="findings">
+
+            <div class="section-title">
+                SECURITY FINDINGS
+            </div>
+
+
+            {% if analysis.risk.reasons %}
+
+                {% for reason in analysis.risk.reasons %}
+
+                <div class="finding">
+
+                    <span class="finding-icon">
+                        ⚠
+                    </span>
+
+                    <span>
+                        {{ reason }}
+                    </span>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="finding safe-finding">
+
+                    <span class="finding-icon">
+                        ✓
+                    </span>
+
+                    <span>
+                        No major security indicators detected.
+                    </span>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- URL ANALYSIS -->
+
+        <div class="analysis-section">
+
+            <div class="section-title">
+                URL ANALYSIS
+            </div>
+
+
+            {% if analysis.urls %}
+
+                {% for item in analysis.urls %}
+
+                <div class="url-item">
+
+                    <div class="url-status">
+
+                        {% if item.suspicious %}
+
+                            <span class="url-warning">
+                                ⚠
+                            </span>
+
+                        {% else %}
+
+                            <span class="url-safe">
+                                ✓
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="url-content">
+
+                        <div class="url-text">
+                            {{ item.url }}
+                        </div>
+
+
+                        {% if item.suspicious %}
+
+                            <div class="url-findings">
+
+                                {% for finding in item.findings %}
+
+                                    <span>
+                                        {{ finding }}
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% else %}
+
+                            <span class="clean-label">
+                                No suspicious characteristics detected
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="empty-analysis">
+                    No URLs found in this email.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- PHISHING INDICATORS -->
+
+        <div class="analysis-section">
+
+            <div class="section-title">
+                PHISHING INDICATORS
+            </div>
+
+
+            {% if analysis.phishing_indicators %}
+
+                {% for indicator in analysis.phishing_indicators %}
+
+                <div class="phishing-item">
+
+                    <div class="phishing-category">
+
+                        {{ indicator.category|replace("_", " ")|upper }}
+
+                    </div>
+
+
+                    <div class="phishing-matches">
+
+                        {% for match in indicator.matches %}
+
+                            <span>
+                                {{ match }}
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="empty-analysis">
+
+                    No phishing indicators detected.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- HEADER ANALYSIS -->
+
+        <div class="analysis-section">
+
+            <div class="section-title">
+                EMAIL HEADER ANALYSIS
+            </div>
+
+
+            {% if analysis.headers.from %}
+
+                <div class="header-details">
+
+                    <div class="header-detail">
+
+                        <span>
+                            FROM
+                        </span>
+
+                        <strong>
+                            {{ analysis.headers.from }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="header-detail">
+
+                        <span>
+                            REPLY-TO
+                        </span>
+
+                        <strong>
+
+                            {% if analysis.headers.reply_to %}
+
+                                {{ analysis.headers.reply_to }}
+
+                            {% else %}
+
+                                Not present
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="header-detail">
+
+                        <span>
+                            RETURN-PATH
+                        </span>
+
+                        <strong>
+
+                            {% if analysis.headers.return_path %}
+
+                                {{ analysis.headers.return_path }}
+
+                            {% else %}
+
+                                Not present
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="header-detail">
+
+                        <span>
+                            RECEIVED HEADERS
+                        </span>
+
+                        <strong>
+                            {{ analysis.headers.received_count }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- AUTHENTICATION -->
+
+                {% if analysis.headers.authentication %}
+
+                <div class="authentication">
+
+                    <div class="subsection-title">
+                        AUTHENTICATION RESULTS
+                    </div>
+
+
+                    {% for item in analysis.headers.authentication %}
+
+                    <div class="auth-item">
+
+                        <div class="auth-name">
+                            {{ item.type }}
+                        </div>
+
+
+                        <div
+                            class="auth-status auth-{{ item.status|lower }}"
+                        >
+                            {{ item.status }}
+                        </div>
+
+
+                        <div class="auth-message">
+
+                            {{ item.message }}
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+
+                <!-- HEADER FINDINGS -->
+
+                {% if analysis.headers.findings %}
+
+                <div class="header-findings">
+
+                    <div class="subsection-title">
+                        HEADER FINDINGS
+                    </div>
+
+
+                    {% for finding in analysis.headers.findings %}
+
+                    <div class="finding">
+
+                        <span class="finding-icon">
+                            ⚠
+                        </span>
+
+                        <span>
+                            {{ finding.message }}
+                        </span>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-analysis">
+
+                    No suspicious header characteristics detected.
+
+                </div>
+
+                {% endif %}
+
+
+            {% else %}
+
+                <div class="empty-analysis">
+
+                    No email headers were provided.
+                    Header analysis was skipped.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- RECOMMENDATION -->
+
+        <div class="recommendation">
+
+            <div class="section-title">
+                RECOMMENDATION
+            </div>
+
+
+            {% if analysis.risk.level in ["HIGH", "CRITICAL"] %}
+
+                <p>
+
+                    Treat this email with caution.
+                    Avoid clicking links, opening unexpected
+                    attachments, or providing credentials.
+                    Verify the sender through a trusted channel.
+
+                </p>
+
+            {% elif analysis.risk.level == "MEDIUM" %}
+
+                <p>
+
+                    Review the detected indicators carefully
+                    before interacting with links or providing
+                    sensitive information.
+
+                </p>
+
+            {% else %}
+
+                <p>
+
+                    No major suspicious indicators were detected
+                    by the current analysis engine. Continue to
+                    follow normal email security practices.
+
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+    <footer>
+
+        <span>
+            MailGuard
+        </span>
+
+        <span>
+            •
+        </span>
+
+        <span>
+            Cybersecurity ML Project
+        </span>
+
+    </footer>
+
+</div>
 
 </body>
 
